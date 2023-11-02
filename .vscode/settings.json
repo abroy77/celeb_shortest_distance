@@ -1,0 +1,3 @@
+{
+    "ruff.lint.run": "onSave"
+}
