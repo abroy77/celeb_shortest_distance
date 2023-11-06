@@ -33,23 +33,6 @@ impl Node {
             movie_id,
         }
     }
-
-    // pub fn get_path_to_root(&self) -> Vec<(u32, Option<u32>)> {
-    //     let mut path = Vec::new();
-    //     let mut current_node = self;
-    //     path.push((current_node.actor_id, current_node.movie_id));
-    //     while let Some(parent) = current_node.parent_node.as_ref() {
-    //         path.push((parent.actor_id, parent.movie_id));
-    //         current_node = parent;
-    //     }
-    //     // now add the last node
-
-    //     path.reverse();
-    //     path
-    // }
-    // pub fn is_target(&self, target_actor_id: usize) -> bool {
-    //     self.actor_id == target_actor_id
-    // }
 }
 
 impl Graph {
@@ -138,16 +121,13 @@ pub fn shortest_path(
             // add this node to the arena
             graph.add_node(neighbour.clone());
             println!("nodes created: {}", graph.nodes.len());
+            println!("nodes explored: {}", num_explored);
             let path = graph.get_path_to_root(graph.nodes.len() - 1);
             return Ok(path);
         }
 
         graph.add_nodes(neighbours);
         num_explored += 1;
-        if num_explored % 1000 == 0 {
-            println!("explored: {}", num_explored);
-            println!("nodes created: {}", graph.nodes.len());
-        }
     }
     Err("no path found")
 }
@@ -158,7 +138,7 @@ mod test {
     use std::path::PathBuf;
 
     fn make_test_db() -> MovieDB {
-        let data_dir = PathBuf::from("data/small");
+        let data_dir = PathBuf::from("data/new_small");
         MovieDBBuilder::from_dir(&data_dir).unwrap()
     }
 

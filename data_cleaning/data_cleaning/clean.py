@@ -21,7 +21,13 @@ def remove_actors_not_in_movies(actors: pd.DataFrame, connections: pd.DataFrame)
 def add_actor_connectivity(actors: pd.DataFrame, connections: pd.DataFrame) -> pd.DataFrame:
     connectivity = connections.groupby("person_id").count().rename(columns={"movie_id": "connectivity"})
     # merge
-    actors = actors.merge(connectivity, how="left", left_on="id", right_on="person_id")
+    actors = actors.merge(connectivity, how="left", right_on="person_id", left_index=True)
+    actors.index.name = "id"
+    return actors
+
+
+def make_actors_lowercase(actors: pd.DataFrame) -> pd.DataFrame:
+    actors["name"] = actors["name"].str.lower()
     return actors
 
 
@@ -40,14 +46,20 @@ def main():
 
     actors = remove_actors_not_in_movies(actors, connections)
 
-    actors = add_actor_connectivity(actors, connections)
+    # actors = add_actor_connectivity(actors, connections)
+
+    actors = make_actors_lowercase(actors)
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # rename birth to birth_year
+    actors = actors.rename(columns={"birth": "birth_year"})
+    connections = connections.rename(columns={"person_id": "actor_id"})
+
     # save as parquet files
-    actors.to_parquet(output_dir / "actors.parquet")
-    movies.to_parquet(output_dir / "movies.parquet")
-    connections.to_parquet(output_dir / "connections.parquet")
+    actors.to_csv(output_dir / "actors.csv", index=True, float_format="%d")
+    movies.to_csv(output_dir / "movies.csv", index=True)
+    connections.to_csv(output_dir / "connections.csv", index=False)
 
     return
 

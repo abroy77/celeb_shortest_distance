@@ -1,15 +1,20 @@
-use crate::data::{MovieDB, MovieDBBuilder};
+use data::{Movie, MovieDB, MovieDBBuilder};
 use graph::shortest_path;
+use std::collections::{HashMap, HashSet};
 use std::env;
+use std::io::{stdin, stdout};
 use std::path::PathBuf;
+use std::thread;
 
-pub mod data;
-pub mod graph;
+mod data;
+mod graph;
+mod integration_tests;
+mod interactive_io;
 
 struct Config {
     db_path: PathBuf,
-    source_actor_name: String,
-    target_actor_name: String,
+    // source_actor_name: String,
+    // target_actor_name: String,
 }
 
 impl Config {
@@ -24,20 +29,20 @@ impl Config {
             None => return Err("Didn't get a db path"),
         };
 
-        let source_actor_name = match args.next() {
-            Some(arg) => arg,
-            None => return Err("Didn't get a source actor name"),
-        };
+        // let source_actor_name = match args.next() {
+        //     Some(arg) => arg,
+        //     None => return Err("Didn't get a source actor name"),
+        // };
 
-        let target_actor_name = match args.next() {
-            Some(arg) => arg,
-            None => return Err("Didn't get a target actor name"),
-        };
+        // let target_actor_name = match args.next() {
+        //     Some(arg) => arg,
+        //     None => return Err("Didn't get a target actor name"),
+        // };
 
         Ok(Config {
             db_path,
-            source_actor_name,
-            target_actor_name,
+            // source_actor_name,
+            // target_actor_name,
         })
     }
 }
@@ -47,35 +52,42 @@ fn main() {
     let config = Config::build(env::args())
         .unwrap_or_else(|err| panic!("Problem parsing arguments: {:?}", err));
 
-    let db: MovieDB = MovieDBBuilder::from_dir(&config.db_path).unwrap_or_else(|err| {
+    let actor_file = config.db_path.join("actors.csv");
+    let actors = MovieDBBuilder::read_actors(&actor_file).unwrap_or_else(|err| {
         panic!(
-            "Problem reading db from file {:?}: {:?}",
-            &config.db_path, err
+            "Problem reading actors from file {:?}: {:?}",
+            &actor_file, err
         );
     });
 
-    let source_actor_id = match db.get_actor_by_name(&config.source_actor_name) {
-        Ok(actor) => actor.id,
-        Err(err) => panic!("Source actor not found in db. err: {err}"),
+    // spawn threads to read movies and connections
+    let movie_conns_handler =
+        thread::spawn(move || MovieDBBuilder::build_movies_connections(&config.db_path));
+
+    // get source and target actors
+    println!("{}", ["#"; 20].concat());
+    println!("Enter source actor name: ");
+    let source_actor = interactive_io::get_unique_actor(stdin().lock(), stdout(), &actors);
+
+    println!("{}", ["#"; 20].concat());
+    println!("Enter target actor name: ");
+    let target_actor = interactive_io::get_unique_actor(stdin().lock(), stdout(), &actors);
+
+    // join handles
+    let (movies, actor_to_movies, movie_to_actors) = movie_conns_handler.join().unwrap().unwrap();
+    // make db and return
+    let db = MovieDB {
+        actor_to_movies,
+        movie_to_actors,
+        actors,
+        movies,
     };
-
-    println!(
-        "ID for Source: {}, is {}",
-        config.source_actor_name, source_actor_id
-    );
-
-    let target_actor_id = match { db.get_actor_by_name(&config.target_actor_name) } {
-        Ok(actor) => actor.id,
-        Err(err) => panic!("Target actor not found in db. err: {err}"),
-    };
-
-    println!(
-        "ID for Target: {}, is {}",
-        config.target_actor_name, target_actor_id
-    );
 
     // get shortest path
-    let shortest_path = shortest_path(source_actor_id, target_actor_id, &db);
+    println!("{}", ["#"; 20].concat());
+    println!("Calculating shortest path...");
+    println!("{}", ["#"; 20].concat());
+    let shortest_path = shortest_path(source_actor, target_actor, &db);
 
     match shortest_path {
         Ok(path) => {
@@ -95,6 +107,9 @@ fn main() {
                 )
             }
         }
-        Err(_) => println!("No path found"),
+        Err(err) => {
+            println!("No path found");
+            println!("{}", err);
+        }
     }
 }
