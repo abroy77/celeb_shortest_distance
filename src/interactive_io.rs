@@ -1,4 +1,4 @@
-use crate::data::{Actor, MovieDBBuilder};
+use crate::data::Actor;
 use std::collections::{HashMap, HashSet};
 /// module for handline stdin inpt and otput for the program
 use std::io::{BufRead, Write};
@@ -91,6 +91,7 @@ where
 #[cfg(test)]
 mod test {
 
+    use crate::data::{Actor, MovieDBBuilder};
     use std::path::PathBuf;
 
     use super::*;

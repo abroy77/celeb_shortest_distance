@@ -4,13 +4,29 @@ mod test {
     use crate::graph::shortest_path;
     use std::path::PathBuf;
 
+    fn make_db(data_dir: &PathBuf) -> MovieDB {
+        let actor_file = data_dir.join("actors.csv");
+        let actors = MovieDBBuilder::read_actors(&actor_file).unwrap();
+        let movie_file = data_dir.join("movies.csv");
+        let movies = MovieDBBuilder::read_movies(&movie_file).unwrap();
+        let actor_movie_file = data_dir.join("connections.csv");
+        let pairs = MovieDBBuilder::read_actor_movie_pairs(&actor_movie_file).unwrap();
+        let (actor_to_movies, movie_to_actors) = MovieDBBuilder::get_actor_movie_maps(pairs);
+        MovieDB {
+            actors,
+            movies,
+            actor_to_movies,
+            movie_to_actors,
+        }
+    }
+
     fn make_small_db() -> MovieDB {
         let data_dir = PathBuf::from("data/new_small");
-        MovieDBBuilder::from_dir(&data_dir).unwrap()
+        make_db(&data_dir)
     }
     fn make_large_db() -> MovieDB {
         let data_dir = PathBuf::from("data/new_large");
-        MovieDBBuilder::from_dir(&data_dir).unwrap()
+        make_db(&data_dir)
     }
     #[test]
     fn cruise_hanks() {

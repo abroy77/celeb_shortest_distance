@@ -1,6 +1,6 @@
-use data::{Movie, MovieDB, MovieDBBuilder};
+use data::{MovieDB, MovieDBBuilder};
 use graph::shortest_path;
-use std::collections::{HashMap, HashSet};
+
 use std::env;
 use std::io::{stdin, stdout};
 use std::path::PathBuf;

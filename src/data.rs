@@ -2,7 +2,7 @@ use csv::ReaderBuilder;
 use serde::Deserialize;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
-use std::error::Error;
+
 use std::fmt::Display;
 use std::io::Error as IoError;
 use std::path::PathBuf;
@@ -36,56 +36,6 @@ pub struct MovieDB {
 pub struct MovieDBBuilder;
 
 impl MovieDBBuilder {
-    pub fn from_dir(dir_path: &PathBuf) -> Result<MovieDB, IoError> {
-        let actor_file = dir_path.join("actors.csv");
-        let actor_reader_handle = thread::spawn(move || {
-            MovieDBBuilder::read_actors(&actor_file).unwrap_or_else(|err| {
-                panic!(
-                    "Problem reading actors from file {:?}: {:?}",
-                    actor_file, err
-                )
-            })
-        });
-
-        let movie_file = dir_path.join("movies.csv");
-        let movies_reader_handle = thread::spawn(move || {
-            MovieDBBuilder::read_movies(&movie_file).unwrap_or_else(|err| {
-                panic!(
-                    "Problem reading movies from file {:?}: {:?}",
-                    movie_file, err
-                )
-            })
-        });
-
-        let actor_movie_file = dir_path.join("connections.csv");
-        let am_reader_handle = thread::spawn(move || {
-            MovieDBBuilder::read_actor_movie_pairs(&actor_movie_file).unwrap_or_else(|err| {
-                panic!(
-                    "Problem reading actor movie pairs from file {:?}: {:?}",
-                    actor_movie_file, err
-                )
-            })
-        });
-
-        // now we need to make both maps
-        let actors = actor_reader_handle.join().unwrap();
-        let movies = movies_reader_handle.join().unwrap();
-        let actor_movie_pairs = am_reader_handle.join().unwrap();
-
-        let (actor_to_movie, movie_to_actor) =
-            MovieDBBuilder::get_actor_movie_maps(actor_movie_pairs);
-
-        // make db and return
-        let db = MovieDB {
-            actor_to_movies: actor_to_movie,
-            movie_to_actors: movie_to_actor,
-            actors,
-            movies,
-        };
-
-        Ok(db)
-    }
-
     pub fn read_actors(fpath: &PathBuf) -> Result<HashMap<usize, Actor>, IoError> {
         let mut actors = HashMap::new();
         let mut rdr = ReaderBuilder::new().from_path(fpath)?;
@@ -121,7 +71,7 @@ impl MovieDBBuilder {
         Ok(actor_movie_map)
     }
 
-    fn get_actor_movie_maps(connections: Vec<(usize, usize)>) -> (Mapping, Mapping) {
+    pub fn get_actor_movie_maps(connections: Vec<(usize, usize)>) -> (Mapping, Mapping) {
         let mut actor_to_movie = HashMap::new();
         let mut movie_to_actor = HashMap::new();
 
@@ -276,7 +226,20 @@ mod test {
     #[test]
     fn data_make_db() {
         let data_dir = PathBuf::from("data/new_small");
-        let db = MovieDBBuilder::from_dir(&data_dir).unwrap();
+        let actor_file = data_dir.join("actors.csv");
+        let actors = MovieDBBuilder::read_actors(&actor_file).unwrap();
+        let movie_file = data_dir.join("movies.csv");
+        let movies = MovieDBBuilder::read_movies(&movie_file).unwrap();
+        let actor_movie_file = data_dir.join("connections.csv");
+        let pairs = MovieDBBuilder::read_actor_movie_pairs(&actor_movie_file).unwrap();
+        let (actor_to_movies, movie_to_actors) = MovieDBBuilder::get_actor_movie_maps(pairs);
+        let db = MovieDB {
+            actor_to_movies,
+            movie_to_actors,
+            actors,
+            movies,
+        };
+
         assert_eq!(db.actors.len(), 15);
         assert_eq!(db.movies.len(), 5);
         assert_eq!(db.actor_to_movies[&102].len(), 2);
