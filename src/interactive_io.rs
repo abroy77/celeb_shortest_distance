@@ -50,7 +50,6 @@ where
     R: BufRead,
     W: Write,
 {
-    println!("Please enter the name of the actor you want to search for:");
     let mut actor_name = String::new();
     reader
         .read_line(&mut actor_name)
