@@ -73,6 +73,12 @@ fn main() {
     println!("Enter target actor name: ");
     let target_actor = interactive_io::get_unique_actor(stdin().lock(), stdout(), &actors);
 
+    if source_actor == target_actor {
+        println!("Source and target actors are the same");
+        println!("0 Degrees of connection");
+        return;
+    }
+
     // join handles
     let (movies, actor_to_movies, movie_to_actors) = movie_conns_handler.join().unwrap().unwrap();
     // make db and return
