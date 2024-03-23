@@ -2,7 +2,16 @@
 A CLI tool to find the shortest path between two movie stars.
 
 ### Usage
-``` ./target/release/celeb_search data/new_large/ ```
+1. Compile using:
+
+        cargo build --release 
+
+2. Run using:
+    
+        ./target/release/celeb_search <path_to_data> 
+
+For the `<path_to_data>` One should use `data/new_small/` for testing and `data/new_large/` for the final run.
+
 
 ### Data
 There are 3 .csv files in data/new_large. These are:
