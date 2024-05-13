@@ -35,6 +35,12 @@ impl Node {
     }
 }
 
+impl Default for Graph {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Graph {
     pub fn new() -> Graph {
         Graph {
@@ -112,7 +118,7 @@ pub fn shortest_path(
         // add current node actor id to explored list
         graph.explored.push(node.actor_id);
         // get neighbours of node
-        let neighbours = graph.get_neighbours(node_index, &movie_db);
+        let neighbours = graph.get_neighbours(node_index, movie_db);
         // check if any neighbour is target
         if let Some(neighbour) = neighbours
             .iter()

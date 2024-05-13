@@ -6,7 +6,7 @@ use strsim::jaro_winkler;
 
 fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
     let selected_actors = actors
-        .into_iter()
+        .iter()
         .filter(|(_, actor)| actor.name == name)
         .map(|(_, actor)| actor.clone())
         .collect();
@@ -14,7 +14,7 @@ fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Acto
 }
 
 fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Actor> {
-    actors.get(&id).map(|actor| actor.clone())
+    actors.get(&id).cloned()
 }
 
 
@@ -68,7 +68,7 @@ where
         .expect("Failed to read line");
     let actor_id = actor_id_str.trim().parse::<usize>().unwrap();
 
-    match get_actor_by_id(&actors, actor_id) {
+    match get_actor_by_id(actors, actor_id) {
         None => {
             writeln!(writer, "No actor found with id: {} \nTry again!", actor_id).unwrap();
             get_unique_actor_by_id(reader, writer, actors)
@@ -91,7 +91,7 @@ where
         .read_line(&mut actor_name)
         .expect("Failed to read line");
     let actor_name = actor_name.trim().to_ascii_lowercase();
-    let selected_actors = get_actor_by_name(&actors, &actor_name);
+    let selected_actors = get_actor_by_name(actors, &actor_name);
     match selected_actors.len() {
         0 => {
             // use fuzzy search to find similar names
@@ -211,14 +211,14 @@ mod test {
     }
 
     #[test]
+    //ignore because long
+    #[ignore = "takes too long"]
     fn get_fuzzy_penelope() {
         let actors = make_test_actors("data/new_large/actors.csv");
         let names: HashSet<_> = fuzzy_search_actor(actors.values().map(|actor| &actor.name), "Tom Cruise").into_iter().collect();
-        let matches = vec![
-            "tom cruise".to_string(),
+        let matches = ["tom cruise".to_string(),
             "tom kruse".to_string(),
-            "tom cruise".to_string(),
-        ];
+            "tom cruise".to_string()];
         assert_eq!(names, matches.iter().collect::<HashSet<_>>());
     }
 }

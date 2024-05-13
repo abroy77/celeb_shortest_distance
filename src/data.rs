@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 
 use std::fmt::Display;
 use std::io::Error as IoError;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::thread;
 
 use std::hash::{Hash, Hasher};
@@ -88,7 +88,7 @@ impl MovieDBBuilder {
     }
 
     pub fn build_movies_connections(
-        dir_path: &PathBuf,
+        dir_path: &Path,
     ) -> Result<(HashMap<usize, Movie>, Mapping, Mapping), IoError> {
         let movie_file = dir_path.join("movies.csv");
         let movies_reader_handle = thread::spawn(move || MovieDBBuilder::read_movies(&movie_file));
@@ -112,7 +112,7 @@ impl MovieDBBuilder {
             Err(_) => {
                 return Err(IoError::new(
                     std::io::ErrorKind::Other,
-                    format!("Problem reading movies from file"),
+                    "Problem reading movies from file".to_string(),
                 ))
             }
         };
@@ -122,7 +122,7 @@ impl MovieDBBuilder {
             Err(_) => {
                 return Err(IoError::new(
                     std::io::ErrorKind::Other,
-                    format!("Problem reading actor movie pairs from file"),
+                    "Problem reading actor movie pairs from file".to_string(),
                 ))
             }
         };
@@ -136,17 +136,11 @@ impl cmp::PartialEq for Movie {
         self.id == other.id
     }
 
-    fn ne(&self, other: &Self) -> bool {
-        self.id != other.id
-    }
 }
 
 impl cmp::PartialEq for Actor {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
-    }
-    fn ne(&self, other: &Self) -> bool {
-        self.id != other.id
     }
 }
 
@@ -174,8 +168,8 @@ impl Display for Actor {
             ),
             None => write!(
                 f,
-                "(id: {}, name: {}, birth_year: {})",
-                self.id, self.name, "unknown"
+                "(id: {}, name: {}, birth_year: unknown)",
+                self.id, self.name
             ),
         }
     }
