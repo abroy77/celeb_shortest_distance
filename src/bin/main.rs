@@ -1,15 +1,12 @@
-use data::{MovieDB, MovieDBBuilder};
-use graph::shortest_path;
+use celeb_shortest_distance::data::{MovieDB, MovieDBBuilder};
+use celeb_shortest_distance::graph::shortest_path;
+use celeb_shortest_distance::interactive_io;
 
 use std::env;
 use std::io::{stdin, stdout};
 use std::path::PathBuf;
 use std::thread;
 
-mod data;
-mod graph;
-mod integration_tests;
-mod interactive_io;
 
 struct Config {
     db_path: PathBuf,

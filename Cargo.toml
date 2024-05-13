@@ -12,4 +12,4 @@ serde = { version = "1.0.189", features = ["derive"] }
 
 [[bin]]
 name = "celeb_search"
-path = "src/main.rs"
+path = "src/bin/main.rs"
