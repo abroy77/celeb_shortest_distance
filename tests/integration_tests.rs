@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
-    use crate::data::{MovieDB, MovieDBBuilder};
-    use crate::graph::shortest_path;
+    use celeb_shortest_distance::data::{MovieDB, MovieDBBuilder};
+    use celeb_shortest_distance::graph::shortest_path;
     use std::path::PathBuf;
 
     fn make_db(data_dir: &PathBuf) -> MovieDB {
