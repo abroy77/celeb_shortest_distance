@@ -2,6 +2,7 @@ use crate::data::Actor;
 use std::collections::{HashMap, HashSet};
 /// module for handline stdin inpt and otput for the program
 use std::io::{BufRead, Write};
+use strsim::jaro_winkler;
 
 fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
     let selected_actors = actors
@@ -15,6 +16,41 @@ fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Acto
 fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Actor> {
     actors.get(&id).map(|actor| actor.clone())
 }
+
+
+fn fuzzy_search_actor<'a, T>(actors: T, name: &str) -> Vec<&'a String> 
+    where T: Iterator<Item = &'a String> {
+        
+        // get the top 3 similarity names 
+        let similar_names = actors
+            .map(|actor| {
+                let similarity = jaro_winkler(actor, name);
+                (actor, similarity)
+            })
+            .collect::<Vec<_>>();
+
+        let mut top_3 :Vec<&(&String, f64)> = similar_names.iter().take(3).collect();
+
+
+        let mut smallest_index = top_3.iter().enumerate().min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap()).unwrap().0;
+        let mut lowest_score = top_3[smallest_index].1;
+
+        for combo in similar_names.iter().skip(3) {
+            if combo.1 > lowest_score {
+                // remove smallest
+                top_3[smallest_index] = combo;
+                // update smallest
+                smallest_index = top_3.iter().enumerate().min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap()).unwrap().0;
+                lowest_score = top_3[smallest_index].1;
+
+            }
+
+        }
+
+        top_3.iter().map(|(name, _)| *name).collect()
+
+}
+
 
 fn get_unique_actor_by_id<R, W>(
     mut reader: R,
@@ -58,12 +94,19 @@ where
     let selected_actors = get_actor_by_name(&actors, &actor_name);
     match selected_actors.len() {
         0 => {
+            // use fuzzy search to find similar names
+            let similar_names = fuzzy_search_actor(actors.values().map(|actor| &actor.name), &actor_name);
             writeln!(
                 writer,
-                "No actor found with name: {} \nTry again!",
+                "No actor found with name: {} \nHere are similar matches:",
                 actor_name
             )
             .unwrap();
+            for name in similar_names {
+                writeln!(writer, "{}", name).unwrap();
+            }
+            writeln!(writer,
+                "Try again!\n").unwrap();
             get_unique_actor(reader, writer, actors)
         }
         1 => {
@@ -95,8 +138,8 @@ mod test {
 
     use super::*;
 
-    fn make_test_actors() -> HashMap<usize, Actor> {
-        let actor_file = PathBuf::from("data/new_small/actors.csv");
+    fn make_test_actors(actor_file: &str) -> HashMap<usize, Actor> {
+        let actor_file = PathBuf::from(actor_file);
         let mut actors = MovieDBBuilder::read_actors(&actor_file).unwrap_or_else(|err| {
             panic!(
                 "Problem reading actors from file {:?}: {:?}",
@@ -115,7 +158,7 @@ mod test {
 
     #[test]
     fn data_read_actor() {
-        let actors = make_test_actors();
+        let actors = make_test_actors("data/new_small/actors.csv");
         let result = HashSet::from([
             Actor {
                 id: 129,
@@ -134,7 +177,7 @@ mod test {
 
     #[test]
     fn test_get_id() {
-        let actors = make_test_actors();
+        let actors = make_test_actors("data/new_small/actors.csv");
         let result = 129;
         let actor = get_actor_by_id(&actors, 129);
         assert_eq!(result, actor.unwrap().id)
@@ -142,7 +185,7 @@ mod test {
 
     #[test]
     fn test_cli_id() {
-        let actors = make_test_actors();
+        let actors = make_test_actors("data/new_small/actors.csv");
         let result = 129;
         let reader = b"20947\n129";
         let mut writer = Vec::new();
@@ -152,7 +195,7 @@ mod test {
 
     #[test]
     fn get_tom() {
-        let actors = make_test_actors();
+        let actors = make_test_actors("data/new_small/actors.csv");
         let input = b"Tom cruise\n129";
         let mut output = Vec::new();
         let id = get_unique_actor(&input[..], &mut output, &actors);
@@ -160,10 +203,22 @@ mod test {
     }
     #[test]
     fn get_hanks() {
-        let actors = make_test_actors();
+        let actors = make_test_actors("data/new_small/actors.csv");
         let input = b"ToM hAnKs";
         let mut output = Vec::new();
         let id = get_unique_actor(&input[..], &mut output, &actors);
         assert_eq!(id, 158);
+    }
+
+    #[test]
+    fn get_fuzzy_penelope() {
+        let actors = make_test_actors("data/new_large/actors.csv");
+        let names: HashSet<_> = fuzzy_search_actor(actors.values().map(|actor| &actor.name), "Tom Cruise").into_iter().collect();
+        let matches = vec![
+            "tom cruise".to_string(),
+            "tom kruse".to_string(),
+            "tom cruise".to_string(),
+        ];
+        assert_eq!(names, matches.iter().collect::<HashSet<_>>());
     }
 }
