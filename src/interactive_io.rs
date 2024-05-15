@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::io::{BufRead, Write};
 use strsim::jaro_winkler;
 
-fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
+pub fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
     let selected_actors = actors
         .iter()
         .filter(|(_, actor)| actor.name == name)
@@ -13,7 +13,7 @@ fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Acto
     selected_actors
 }
 
-fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Actor> {
+pub fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Actor> {
     actors.get(&id).cloned()
 }
 
