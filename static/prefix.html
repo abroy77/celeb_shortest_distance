@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Autofill Example</title>
+    <script>
+        function autofill() {
+            // Call your backend function here to fetch autofill suggestions
+            // and update the dropdown menu accordingly
+            // You can use AJAX or fetch API to make the backend call
+
+            // Example code to update the dropdown menu with suggestions
+            var input = document.getElementById("searchInput");
+            var dropdown = document.getElementById("suggestionsDropdown");
+
+            // Clear previous suggestions
+            dropdown.innerHTML = "";
+
+            // Get the current input value
+            var inputValue = input.value;
+
+            // Make the backend call and get the suggestions
+            // Replace the following code with your actual backend call
+            var suggestions = [
+                "Suggestion 1",
+                "Suggestion 2",
+                "Suggestion 3"
+            ];
+
+            // Create and append dropdown items for each suggestion
+            suggestions.forEach(function(suggestion) {
+                var option = document.createElement("option");
+                option.value = suggestion;
+                dropdown.appendChild(option);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Autofill Example</h1>
+    <form>
+        <input type="text" id="searchInput" onkeyup="autofill()" placeholder="Type something...">
+        <select id="suggestionsDropdown"></select>
+    </form>
+</body>
+</html>

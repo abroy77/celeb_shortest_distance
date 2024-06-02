@@ -7,7 +7,7 @@ use strsim::jaro_winkler;
 pub fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
     let selected_actors = actors
         .iter()
-        .filter(|(_, actor)| actor.name == name)
+        .filter(|(_, actor)| actor.full_name == name)
         .map(|(_, actor)| actor.clone())
         .collect();
     selected_actors
@@ -95,7 +95,7 @@ where
     match selected_actors.len() {
         0 => {
             // use fuzzy search to find similar names
-            let similar_names = fuzzy_search_actor(actors.values().map(|actor| &actor.name), &actor_name);
+            let similar_names = fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), &actor_name);
             writeln!(
                 writer,
                 "No actor found with name: {} \nHere are similar matches:",
@@ -149,7 +149,7 @@ mod test {
         // push a second tom cruise entry
         let tom_cruise = Actor {
             id: 1,
-            name: "tom cruise".to_string(),
+            full_name: "tom cruise".to_string(),
             birth_year: Some(2006),
         };
         actors.insert(1, tom_cruise);
@@ -162,12 +162,12 @@ mod test {
         let result = HashSet::from([
             Actor {
                 id: 129,
-                name: "tom cruise".to_string(),
+                full_name: "tom cruise".to_string(),
                 birth_year: Some(1962),
             },
             Actor {
                 id: 1,
-                name: "tom cruise".to_string(),
+                full_name: "tom cruise".to_string(),
                 birth_year: Some(2006),
             },
         ]);
@@ -215,7 +215,7 @@ mod test {
     #[ignore = "takes too long"]
     fn get_fuzzy_penelope() {
         let actors = make_test_actors("data/new_large/actors.csv");
-        let names: HashSet<_> = fuzzy_search_actor(actors.values().map(|actor| &actor.name), "Tom Cruise").into_iter().collect();
+        let names: HashSet<_> = fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), "Tom Cruise").into_iter().collect();
         let matches = ["tom cruise".to_string(),
             "tom kruse".to_string(),
             "tom cruise".to_string()];

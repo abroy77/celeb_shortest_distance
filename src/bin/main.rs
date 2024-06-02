@@ -106,7 +106,7 @@ fn main() {
                     .unwrap();
                 println!(
                     "{} was in {} with {}",
-                    actor_1.name, movie.title, actor_2.name
+                    actor_1.full_name, movie.title, actor_2.full_name
                 )
             }
         }

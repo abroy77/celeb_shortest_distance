@@ -19,7 +19,7 @@ pub struct Movie {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Actor {
     pub id: usize,
-    pub name: String,
+    pub full_name: String,
     pub birth_year: Option<u32>,
     // pub connectivity: Option<usize>,
 }
@@ -164,12 +164,12 @@ impl Display for Actor {
             Some(year) => write!(
                 f,
                 "(id: {}, name: {}, birth_year: {})",
-                self.id, self.name, year
+                self.id, self.full_name, year
             ),
             None => write!(
                 f,
                 "(id: {}, name: {}, birth_year: unknown)",
-                self.id, self.name
+                self.id, self.full_name
             ),
         }
     }
@@ -189,7 +189,7 @@ mod test {
             actors[&197],
             Actor {
                 id: 197,
-                name: "Jack Nicholson".to_string(),
+                full_name: "Jack Nicholson".to_string(),
                 birth_year: Some(1937),
             }
         )
