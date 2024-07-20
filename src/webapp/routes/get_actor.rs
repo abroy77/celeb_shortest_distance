@@ -1,38 +1,45 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
-use sqlx;
-use sqlx::PgPool;
+use sqlx::{self, SqlitePool, FromRow};
+use crate::webapp::db_connection;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, FromRow)]
 pub struct ActorQuery {
     name: String,
 }
 pub async fn get_actor_prefix(
-    pg_pool: web::Data<PgPool>,
+    pg_pool: web::Data<SqlitePool>,
     query: web::Query<ActorQuery>,
 ) -> impl Responder {
     let name = &query.name;
-    if name.len() < 3 {
+    if name.len() < 4 {
         return HttpResponse::Ok().json(Vec::<String>::new());
     }
-    let actors = prefix_query_actors(&pg_pool, &query.name).await;
+    let actors = db_connection::prefix_query_actors(&pg_pool, &query.name).await;
 
     HttpResponse::Ok().json(actors)
 }
 
-async fn prefix_query_actors(pg_pool: &PgPool, name: &str) -> Vec<String> {
-
-    sqlx::query!(
-        r#"SELECT full_name FROM actors 
-        WHERE full_name ILIKE $1 || '%' 
-        LIMIT 5"#,
-        name
-        )
-    .fetch_all(pg_pool)
-    .await
-    .unwrap()
-    .into_iter()
-    .map(|row| row.full_name)
-    .collect()
-
+pub async fn get_actor(
+    pg_pool: web::Data<SqlitePool>,
+    query: web::Query<ActorQuery>,
+) -> impl Responder {
+    let name = &query.name;
+    if name.len() < 4 {
+        return HttpResponse::Ok().json(Vec::<String>::new());
     }
+    let actor = db_connection::query_actor(&pg_pool, &query.name).await;
+
+    if actor.is_empty() {
+        let similar_actors = db_connection::query_similar_actor(&pg_pool, &query.name).await;
+        return HttpResponse::Ok().json(similar_actors);
+    }
+    else if actor.len() == 1 {
+        return HttpResponse::Ok().json(actor);
+    }
+    else {
+        HttpResponse::Ok().json(actor)
+    }
+
+}
+

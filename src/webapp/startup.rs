@@ -1,14 +1,14 @@
-use actix_web::{App, HttpServer, web, HttpResponse, Responder,
-dev::Server};
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use actix_web::{App, HttpServer, web,dev::Server};
+use sqlx::sqlite::{ SqlitePool, SqlitePoolOptions};
 use std::net::TcpListener;
 use std::path::PathBuf;
 use serde::Deserialize;
 use crate::data::{MovieDB, MovieDBBuilder};
+use crate::webapp::routes::shortest_path::get_shortest_path;
 use std::thread;
 use crate::configuration::{Settings, DatabaseSettings};
+use crate::webapp::routes::{get_actor_prefix, get_actor};
 use tracing_actix_web::TracingLogger;
-use crate::webapp::routes::get_actor_prefix;
 
 pub struct Application {
     pub port: u16,
@@ -43,13 +43,14 @@ impl Application {
     }
 }
 
-pub fn get_connection_pool(db_config: &DatabaseSettings) -> PgPool {
-    PgPoolOptions::new().connect_lazy_with(db_config.with_db())
+pub fn get_connection_pool(db_config: &DatabaseSettings) -> SqlitePool {
+    SqlitePoolOptions::new().connect_lazy_with(db_config.connection_options())
+
 }
 
 pub fn run(
     listener: TcpListener,
-    connection_pool: PgPool,
+    connection_pool: SqlitePool,
     movie_db: MovieDB,
 ) -> Result<Server, std::io::Error> {
     let connection_pool = web::Data::new(connection_pool);
@@ -59,8 +60,9 @@ pub fn run(
             .wrap(TracingLogger::default())
             // .route("/health_check", web::get().to(health_check::health_check))
             // .route("/subscriptions", web::post().to(subscriptions::subscribe))
-            // .route("/actor", web::get().to(get_actor::get_actor))
+            .route("/actor", web::get().to(get_actor))
             .route("/actor_prefix", web::get().to(get_actor_prefix))
+            .route("/shortest_path", web::get().to(get_shortest_path))
             .app_data(connection_pool.clone())
             .app_data(movie_db.clone())
     })

@@ -1,4 +1,4 @@
 -- Add migration script here
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
-CREATE INDEX idx_full_name ON actors USING GIN (full_name gin_trgm_ops);
+-- Create virtual table
+CREATE VIRTUAL TABLE actors USING fts5(full_name, birth_year UNINDEXED, tokenize="trigram", prefix="5 7 10");
+ 

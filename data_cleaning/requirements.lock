@@ -13,8 +13,6 @@ numpy==1.26.4
     # via pandas
 pandas==2.2.2
     # via data-cleaning
-psycopg2==2.9.9
-    # via data-cleaning
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.1
