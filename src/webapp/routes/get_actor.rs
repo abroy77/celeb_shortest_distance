@@ -1,7 +1,7 @@
+use crate::{data::Actor, webapp::db_connection};
 use actix_web::{web, HttpResponse, Responder};
 use serde::Deserialize;
-use sqlx::{self, SqlitePool, FromRow};
-use crate::webapp::db_connection;
+use sqlx::{self, FromRow, SqlitePool};
 
 #[derive(Deserialize, FromRow)]
 pub struct ActorQuery {
@@ -13,7 +13,7 @@ pub async fn get_actor_prefix(
 ) -> impl Responder {
     let name = &query.name;
     if name.len() < 4 {
-        return HttpResponse::Ok().json(Vec::<String>::new());
+        return HttpResponse::Ok().json(Vec::<Actor>::new());
     }
     let actors = db_connection::prefix_query_actors(&pg_pool, &query.name).await;
 
@@ -32,14 +32,10 @@ pub async fn get_actor(
 
     if actor.is_empty() {
         let similar_actors = db_connection::query_similar_actor(&pg_pool, &query.name).await;
-        return HttpResponse::Ok().json(similar_actors);
-    }
-    else if actor.len() == 1 {
+        HttpResponse::Ok().json(similar_actors)
+    } else if actor.len() == 1 {
         return HttpResponse::Ok().json(actor);
-    }
-    else {
+    } else {
         HttpResponse::Ok().json(actor)
     }
-
 }
-
