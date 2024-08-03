@@ -7,7 +7,6 @@ use std::io::{stdin, stdout};
 use std::path::PathBuf;
 use std::thread;
 
-
 struct Config {
     db_path: PathBuf,
     // source_actor_name: String,

@@ -1,11 +1,12 @@
 use csv::ReaderBuilder;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 
 use std::fmt::Display;
 use std::io::Error as IoError;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::thread;
 
 use std::hash::{Hash, Hasher};
@@ -16,7 +17,7 @@ pub struct Movie {
     pub title: String,
     pub year: u32,
 }
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, FromRow, Serialize)]
 pub struct Actor {
     pub id: usize,
     pub full_name: String,
@@ -135,7 +136,6 @@ impl cmp::PartialEq for Movie {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
-
 }
 
 impl cmp::PartialEq for Actor {

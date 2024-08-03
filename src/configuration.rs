@@ -1,11 +1,9 @@
-use std::path::PathBuf;
 use config;
 use serde;
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::sqlite::{SqlitePool, SqliteConnectOptions};
-use sqlx::ConnectOptions;
-
+use sqlx::sqlite::SqliteConnectOptions;
+use std::path::PathBuf;
 
 #[derive(Deserialize, Clone)]
 pub struct Settings {
@@ -19,11 +17,12 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
+    pub allow_cors: bool,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct DatabaseSettings {
-   pub path: String 
+    pub path: String,
 }
 
 #[derive(Deserialize, Clone)]
@@ -64,11 +63,8 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 }
 
 impl DatabaseSettings {
-
     pub fn connection_options(&self) -> SqliteConnectOptions {
-        SqliteConnectOptions::new()
-            .filename(&self.path)
-    
+        SqliteConnectOptions::new().filename(&self.path)
     }
 }
 

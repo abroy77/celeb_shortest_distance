@@ -17,40 +17,45 @@ pub fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Acto
     actors.get(&id).cloned()
 }
 
+fn fuzzy_search_actor<'a, T>(actors: T, name: &str) -> Vec<&'a String>
+where
+    T: Iterator<Item = &'a String>,
+{
+    // get the top 3 similarity names
+    let similar_names = actors
+        .map(|actor| {
+            let similarity = jaro_winkler(actor, name);
+            (actor, similarity)
+        })
+        .collect::<Vec<_>>();
 
-fn fuzzy_search_actor<'a, T>(actors: T, name: &str) -> Vec<&'a String> 
-    where T: Iterator<Item = &'a String> {
-        
-        // get the top 3 similarity names 
-        let similar_names = actors
-            .map(|actor| {
-                let similarity = jaro_winkler(actor, name);
-                (actor, similarity)
-            })
-            .collect::<Vec<_>>();
+    let mut top_3: Vec<&(&String, f64)> = similar_names.iter().take(3).collect();
 
-        let mut top_3 :Vec<&(&String, f64)> = similar_names.iter().take(3).collect();
+    let mut smallest_index = top_3
+        .iter()
+        .enumerate()
+        .min_by(|a, b| a.1 .1.partial_cmp(&b.1 .1).unwrap())
+        .unwrap()
+        .0;
+    let mut lowest_score = top_3[smallest_index].1;
 
-
-        let mut smallest_index = top_3.iter().enumerate().min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap()).unwrap().0;
-        let mut lowest_score = top_3[smallest_index].1;
-
-        for combo in similar_names.iter().skip(3) {
-            if combo.1 > lowest_score {
-                // remove smallest
-                top_3[smallest_index] = combo;
-                // update smallest
-                smallest_index = top_3.iter().enumerate().min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap()).unwrap().0;
-                lowest_score = top_3[smallest_index].1;
-
-            }
-
+    for combo in similar_names.iter().skip(3) {
+        if combo.1 > lowest_score {
+            // remove smallest
+            top_3[smallest_index] = combo;
+            // update smallest
+            smallest_index = top_3
+                .iter()
+                .enumerate()
+                .min_by(|a, b| a.1 .1.partial_cmp(&b.1 .1).unwrap())
+                .unwrap()
+                .0;
+            lowest_score = top_3[smallest_index].1;
         }
+    }
 
-        top_3.iter().map(|(name, _)| *name).collect()
-
+    top_3.iter().map(|(name, _)| *name).collect()
 }
-
 
 fn get_unique_actor_by_id<R, W>(
     mut reader: R,
@@ -95,7 +100,8 @@ where
     match selected_actors.len() {
         0 => {
             // use fuzzy search to find similar names
-            let similar_names = fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), &actor_name);
+            let similar_names =
+                fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), &actor_name);
             writeln!(
                 writer,
                 "No actor found with name: {} \nHere are similar matches:",
@@ -105,8 +111,7 @@ where
             for name in similar_names {
                 writeln!(writer, "{}", name).unwrap();
             }
-            writeln!(writer,
-                "Try again!\n").unwrap();
+            writeln!(writer, "Try again!\n").unwrap();
             get_unique_actor(reader, writer, actors)
         }
         1 => {
@@ -215,10 +220,15 @@ mod test {
     #[ignore = "takes too long"]
     fn get_fuzzy_penelope() {
         let actors = make_test_actors("data/new_large/actors.csv");
-        let names: HashSet<_> = fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), "Tom Cruise").into_iter().collect();
-        let matches = ["tom cruise".to_string(),
+        let names: HashSet<_> =
+            fuzzy_search_actor(actors.values().map(|actor| &actor.full_name), "Tom Cruise")
+                .into_iter()
+                .collect();
+        let matches = [
+            "tom cruise".to_string(),
             "tom kruse".to_string(),
-            "tom cruise".to_string()];
+            "tom cruise".to_string(),
+        ];
         assert_eq!(names, matches.iter().collect::<HashSet<_>>());
     }
 }

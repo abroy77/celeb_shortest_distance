@@ -1,43 +1,30 @@
 use crate::{data::MovieDB, graph::shortest_path};
 use actix_web::{web, HttpResponse, Responder};
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
 pub struct TwoActors {
+    actor_1: usize,
+    actor_2: usize,
+}
+#[derive(Serialize)]
+pub struct Connection {
     actor_1: String,
+    movie: String,
     actor_2: String,
 }
 
 pub async fn get_shortest_path(
-    query: web::Query<TwoActors>,
+    query: web::Form<TwoActors>,
     movie_db: web::Data<MovieDB>,
 ) -> impl Responder {
-    let actor_1_id = movie_db
-        .actors
-        .iter()
-        .filter(|(_, actor)| actor.full_name == query.actor_1)
-        .map(|(_, actor)| actor.id)
-        .next();
-
-    let actor_2_id = movie_db
-        .actors
-        .iter()
-        .filter(|(_, actor)| actor.full_name == query.actor_2)
-        .map(|(_, actor)| actor.id)
-        .next();
-
-    let actor_1_id = match actor_1_id {
-        Some(id) => id,
-        None => return HttpResponse::NotFound().finish(),
-    };
-
-    let actor_2_id = match actor_2_id {
-        Some(id) => id,
-        None => return HttpResponse::NotFound().finish(),
-    };  
-
-    let shortest_path = shortest_path(actor_1_id, actor_2_id, &movie_db);
+    if !movie_db.actors.contains_key(&query.actor_1) {
+        return HttpResponse::NotFound().body("Actor 1 not found");
+    }
+    if !movie_db.actors.contains_key(&query.actor_2) {
+        return HttpResponse::NotFound().body("Actor 2 not found");
+    }
+    let shortest_path = shortest_path(query.actor_1, query.actor_2, &movie_db);
 
     let mut shortest_path_json = Vec::new();
 
@@ -51,37 +38,57 @@ pub async fn get_shortest_path(
                     .get(&path[node_index + 1].movie_id.unwrap())
                     .unwrap();
 
-                let json_obj = json!({
-                    "actor_1": actor_1.full_name,
-                    "movie": movie.title,
-                    "actor_2": actor_2.full_name,
-                });
+                let connection = Connection {
+                    actor_1: actor_1.full_name.clone(),
+                    movie: movie.title.clone(),
+                    actor_2: actor_2.full_name.clone(),
+                };
 
-                shortest_path_json.push(json_obj);
+                shortest_path_json.push(connection);
             }
 
             HttpResponse::Ok().json(shortest_path_json)
         }
-        Err(err) => {
-            println!("No path found");
-            println!("{}", err);
-            HttpResponse::InternalServerError().finish()
+        Err(_) => {
+            let actor_1_name = &movie_db.actors.get(&query.actor_1).unwrap().full_name;
+            let actor_2_name = &movie_db.actors.get(&query.actor_2).unwrap().full_name;
+
+            HttpResponse::InternalServerError().body(format!(
+                "No connection found between {} and {}",
+                actor_1_name, actor_2_name
+            ))
         }
     }
-
 }
 
 // tests
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use sqlx::{sqlite::SqliteConnectOptions, sqlite::SqlitePoolOptions, SqlitePool};
 
+    use super::*;
+    use crate::data::Actor;
+    use sqlx::{sqlite::SqliteConnectOptions, sqlite::SqlitePoolOptions, SqlitePool};
 
     fn setup_actor_db() -> SqlitePool {
         let cnnection_options = SqliteConnectOptions::new().filename("actors.db");
 
-        let pool = SqlitePoolOptions::new().connect_lazy_with(cnnection_options);
-        pool
+        SqlitePoolOptions::new().connect_lazy_with(cnnection_options)
     }
+    fn srk() -> Actor {
+        Actor {
+            full_name: "Shah Rukh Khan".to_string(),
+            id: 451321,
+            birth_year: Some(1965),
+        }
+    }
+
+    fn tom_cruise() -> Actor {
+        Actor {
+            full_name: "Tom Cruise".to_string(),
+            id: 129,
+            birth_year: Some(1962),
+        }
+    }
+
+    //
 }

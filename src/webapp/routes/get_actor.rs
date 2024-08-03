@@ -9,7 +9,7 @@ pub struct ActorQuery {
 }
 pub async fn get_actor_prefix(
     pg_pool: web::Data<SqlitePool>,
-    query: web::Query<ActorQuery>,
+    query: web::Form<ActorQuery>,
 ) -> impl Responder {
     let name = &query.name;
     if name.len() < 4 {
