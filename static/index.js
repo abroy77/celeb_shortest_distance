@@ -150,6 +150,7 @@ const errorSection = document.getElementById('error-section');
 const submissionResultsList = document.getElementById('submission-results-list');
 const pathLengthHeader = document.getElementById('path-length-header');
 const resultsSection = document.getElementById('submission-results');
+const spinner = document.getElementById('spinner-loading');
 
 async function get_shortest_path(actor_1_id, actor_2_id) {
     try {
@@ -195,7 +196,7 @@ async function render_path(shortest_path) {
             listItem.classList.add('list-group-item');
 
             // Set the text content with bullet points
-            listItem.textContent = `${actor_1} acted in ${movie} with ${actor_2}`;
+            listItem.textContent = `${capitalizeWords(actor_1)} acted in ${movie} with ${capitalizeWords(actor_2)}`;
 
             // Append the list item to the submission results
             submissionResultsList.appendChild(listItem);
@@ -212,7 +213,10 @@ submitButton.addEventListener('click', async () => {
 
     if (actor_1 && actor_2) {
         try {
+            spinner.classList.remove('d-none');
+            resultsSection.style.display = 'none';
             let shortest_path_json = await get_shortest_path(actor_1, actor_2);
+            spinner.classList.add('d-none');
             render_path(shortest_path_json);
             // Hide the error section
             errorSection.style.display = 'none';
@@ -220,6 +224,7 @@ submitButton.addEventListener('click', async () => {
             resultsSection.style.display = 'block';
         } catch (error) {
             console.error(error);
+            spinner.classList.add('d-none');
             // Show the error section
             errorSection.style.display = 'block';
             // Hide the submission results
@@ -230,6 +235,7 @@ submitButton.addEventListener('click', async () => {
         errorSection.style.display = 'block';
         // Hide the submission results
         submissionResultsList.style.display = 'none';
+        spinner.classList.add('d-none');
     }
 });
 
