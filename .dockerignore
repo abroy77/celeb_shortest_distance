@@ -1,0 +1,33 @@
+# Ignore target directory
+target/
+
+# Ignore editor-specific files
+.vscode/
+.idea/
+
+# Ignore any generated files
+**/*.rs.bk
+
+# Ignore any temporary files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+# Ignore CI/CD files
+.github/
+# Ignore data_cleaning
+data_cleaning/
+# Ignore gitingore
+.gitignore
+# Ignore dockerignore
+.dockerignore
+# ignore dockerfile
+Dockerfile
+# Ignore readme
+README.md
+# Ignore data
+data/
+# except what's needed
+!data/new_large/
+!data/new_small/
