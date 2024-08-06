@@ -32,8 +32,6 @@ pub async fn get_shortest_path(
 
     let shortest_path = shortest_path(query.actor_1, query.actor_2, &movie_db);
 
-    
-
     match shortest_path {
         Ok(path) => {
             for node_index in 0..(path.len() - 1) {
