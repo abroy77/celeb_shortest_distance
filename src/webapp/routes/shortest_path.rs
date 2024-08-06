@@ -24,9 +24,15 @@ pub async fn get_shortest_path(
     if !movie_db.actors.contains_key(&query.actor_2) {
         return HttpResponse::NotFound().body("Actor 2 not found");
     }
-    let shortest_path = shortest_path(query.actor_1, query.actor_2, &movie_db);
 
     let mut shortest_path_json = Vec::new();
+    if query.actor_1 == query.actor_2 {
+        return HttpResponse::Ok().json(shortest_path_json);
+    }
+
+    let shortest_path = shortest_path(query.actor_1, query.actor_2, &movie_db);
+
+    
 
     match shortest_path {
         Ok(path) => {
