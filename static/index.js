@@ -116,7 +116,7 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
 
     const timeout = setTimeout(() => {
         controller.abort();
-    }, 15000);
+    }, 25000);
 
     try {
         const urlSearchParams = new URLSearchParams();
