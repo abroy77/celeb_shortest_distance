@@ -2,9 +2,9 @@
 mod test {
     use celeb_shortest_distance::data::{MovieDB, MovieDBBuilder};
     use celeb_shortest_distance::graph::shortest_path;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
 
-    fn make_db(data_dir: &PathBuf) -> MovieDB {
+    fn make_db(data_dir: &Path) -> MovieDB {
         let actor_file = data_dir.join("actors.csv");
         let actors = MovieDBBuilder::read_actors(&actor_file).unwrap();
         let movie_file = data_dir.join("movies.csv");

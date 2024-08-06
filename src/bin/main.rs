@@ -7,7 +7,6 @@ use std::io::{stdin, stdout};
 use std::path::PathBuf;
 use std::thread;
 
-
 struct Config {
     db_path: PathBuf,
     // source_actor_name: String,
@@ -106,7 +105,7 @@ fn main() {
                     .unwrap();
                 println!(
                     "{} was in {} with {}",
-                    actor_1.name, movie.title, actor_2.name
+                    actor_1.full_name, movie.title, actor_2.full_name
                 )
             }
         }
