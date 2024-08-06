@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "dev, master" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      # - name: Install Rust toolchain
-      #   uses: dtolnay/rust-toolchain@stable
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2.7.3    
         with:
@@ -69,24 +67,4 @@ jobs:
       - name: Linting
         run: cargo clippy -- -D warnings
 
-  coverage:
-    name: Code coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name : Checkout repository
-        uses: actions/checkout@v4
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2.7.3    
-        with:
-          key: sqlx-${{ env.SQLX_VERSION }}
-      - name: Install sqlx-cli
-        run: 
-          cargo install sqlx-cli
-          --version=${{ env.SQLX_VERSION }}
-          --no-default-features
-          --features=${{ env.SQLX_FEATURES }}
-          --locked
-      - name: Migrate db
-        run: RESET_DB=true ./scripts/init_actor_db.sh
-      - name: Generate code coverage
-        run: cargo install cargo-tarpaulin && cargo tarpaulin --verbose --workspace
+  
