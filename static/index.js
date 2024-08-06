@@ -197,8 +197,12 @@ submitButton.addEventListener('click', async () => {
 
     isSubmitting = true;
 
+
     let actor_1 = selections['actor_1'];
     let actor_2 = selections['actor_2'];
+
+    // hide the error message
+    errorSection.style.display = 'none';
 
     if (actor_1 && actor_2) {
         try {
