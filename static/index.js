@@ -188,7 +188,15 @@ async function render_path(shortest_path) {
 }
 
 // Add an event listener for submit button click
+let isSubmitting = false;
+
 submitButton.addEventListener('click', async () => {
+    if (isSubmitting) {
+        return;
+    }
+
+    isSubmitting = true;
+
     let actor_1 = selections['actor_1'];
     let actor_2 = selections['actor_2'];
 
@@ -212,6 +220,8 @@ submitButton.addEventListener('click', async () => {
             errorSection.style.display = 'block';
             // Hide the submission results
             resultsSection.style.display = 'none';
+        } finally {
+            isSubmitting = false;
         }
     } else {
         // Show the error section
@@ -219,6 +229,7 @@ submitButton.addEventListener('click', async () => {
         // Hide the submission results
         submissionResultsList.style.display = 'none';
         spinner.classList.add('d-none');
+        isSubmitting = false;
     }
 });
 
