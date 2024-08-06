@@ -66,48 +66,6 @@ function update_table(actor_data, actor_index) {
     }
 }
 
-// function update_search_results(input_value, target, selection) {
-
-//     let search_results = await get_actor_search_results(input_value);
-
-
-//         .then(data => {
-//         // Handle the response data
-//         console.log(data);
-//         // get the searc_table_1 element
-//         let table = document.getElementById(target);
-//         // Clear the search_table_1 body, not the header
-//         table.innerHTML = table.rows[0].innerHTML;
-//         // Loop through the data
-//         data.forEach(row => {
-//             // Create a new row
-//             let newRow = table.insertRow(-1);
-//             // insert the id
-//             let newCellId = newRow.insertCell(0);
-//             newCellId.innerHTML = row.id;
-//             // insert the name
-//             let newCellName = newRow.insertCell(1);
-//             newCellName.innerHTML = row.full_name;
-//             // insert birth year
-//             let newCellBirthYear = newRow.insertCell(2);
-//             newCellBirthYear.innerHTML = row.birth_year;
-
-//             // add row event listener
-//             addRowClickListener(newRow, selection);
-
-
-//             return row.id;
-
-//         })
-//             .catch(error => {
-//                 // Handle any errors
-//                 console.error(error);
-//             });
-
-//     });
-
-// }
-
 function addRowClickListener(row, actor_index) {
     row.addEventListener('click', () => {
         // Remove highlight from previously selected row
@@ -201,6 +159,11 @@ async function render_path(shortest_path) {
             // Append the list item to the submission results
             submissionResultsList.appendChild(listItem);
         }
+        // wait for the results to be rendered
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        // after the results are rendered, scroll to the results section
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+
     } catch (error) {
         console.error(error);
     }
