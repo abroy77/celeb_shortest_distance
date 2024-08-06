@@ -71,7 +71,7 @@ pub fn run(
             .route("/actor", web::get().to(get_actor))
             .route("/actor_prefix", web::post().to(get_actor_prefix))
             .route("/shortest_path", web::post().to(get_shortest_path))
-            .route("/home", web::get().to(homepage))
+            .route("/", web::get().to(homepage))
             .service(fs::Files::new("/static", "./static"))
             .app_data(connection_pool.clone())
             .app_data(movie_db.clone())
