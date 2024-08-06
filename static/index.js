@@ -111,6 +111,13 @@ const resultsSection = document.getElementById('submission-results');
 const spinner = document.getElementById('spinner-loading');
 
 async function get_shortest_path(actor_1_id, actor_2_id) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 15000);
+
     try {
         const urlSearchParams = new URLSearchParams();
         urlSearchParams.append('actor_1', actor_1_id);
@@ -122,7 +129,10 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
+            signal: signal
         });
+
+        clearTimeout(timeout);
 
         if (!response.ok) {
             throw new Error('Failed to fetch shortest path');
@@ -130,7 +140,12 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
 
         const data = await response.json();
         return data;
+
     } catch (error) {
+        clearTimeout(timeout);
+        if (error.name === 'AbortError') {
+            throw new Error('Bro, this is taking too long. Please choose another pair.');
+        }
         console.error(error);
         throw error;
     }
@@ -188,6 +203,8 @@ submitButton.addEventListener('click', async () => {
         } catch (error) {
             console.error(error);
             spinner.classList.add('d-none');
+            // Show the error message in the error section
+            errorSection.innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
             // Show the error section
             errorSection.style.display = 'block';
             // Hide the submission results
