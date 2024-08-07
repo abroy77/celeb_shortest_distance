@@ -112,6 +112,13 @@ const resultsSection = document.getElementById('submission-results');
 const spinner = document.getElementById('spinner-loading');
 
 async function get_shortest_path(actor_1_id, actor_2_id) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 25000);
+
     try {
         const urlSearchParams = new URLSearchParams();
         urlSearchParams.append('actor_1', actor_1_id);
@@ -123,15 +130,26 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
+            signal: signal
         });
+
+        clearTimeout(timeout);
 
         if (!response.ok) {
             throw new Error('Failed to fetch shortest path');
         }
 
         const data = await response.json();
+        if (data.length === 0) {
+            throw new Error('Nice try bro it\'s the same person. I\'m not that dumb.');
+        }
         return data;
+
     } catch (error) {
+        clearTimeout(timeout);
+        if (error.name === 'AbortError') {
+            throw new Error('Bro, this is taking too long. Please choose another pair.');
+        }
         console.error(error);
         throw error;
     }
@@ -171,9 +189,21 @@ async function render_path(shortest_path) {
 }
 
 // Add an event listener for submit button click
+let isSubmitting = false;
+
 submitButton.addEventListener('click', async () => {
+    if (isSubmitting) {
+        return;
+    }
+
+    isSubmitting = true;
+
+
     let actor_1 = selections['actor_1'];
     let actor_2 = selections['actor_2'];
+
+    // hide the error message
+    errorSection.style.display = 'none';
 
     if (actor_1 && actor_2) {
         try {
@@ -199,6 +229,8 @@ submitButton.addEventListener('click', async () => {
             // Hide the submission results
             resultsSection.style.display = 'none';
 
+        } finally {
+            isSubmitting = false;
         }
     } else {
         // Show the error section
@@ -206,6 +238,7 @@ submitButton.addEventListener('click', async () => {
         // Hide the submission results
         submissionResultsList.style.display = 'none';
         spinner.classList.add('d-none');
+        isSubmitting = false;
     }
 });
 
