@@ -117,7 +117,7 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
 
     const timeout = setTimeout(() => {
         controller.abort();
-    }, 25000);
+    }, 60000);
 
     try {
         const urlSearchParams = new URLSearchParams();
@@ -128,7 +128,7 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
             method: 'POST',
             body: urlSearchParams,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded',
             },
             signal: signal
         });
@@ -145,10 +145,11 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
         }
         return data;
 
+
     } catch (error) {
         clearTimeout(timeout);
         if (error.name === 'AbortError') {
-            throw new Error('Bro, this is taking too long. Please choose another pair.');
+            throw new Error('Timed out after 60s');
         }
         console.error(error);
         throw error;
@@ -223,7 +224,7 @@ submitButton.addEventListener('click', async () => {
         } catch (error) {
             console.error(error);
             spinner.classList.add('d-none');
-            error_message.textContent = 'Failed to fetch shortest path';
+            error_message.textContent = error.message;
             // Show the error section
             errorSection.style.display = 'block';
             // Hide the submission results
@@ -233,6 +234,8 @@ submitButton.addEventListener('click', async () => {
             isSubmitting = false;
         }
     } else {
+
+        error_message.textContent = 'Please select 2 actors';
         // Show the error section
         errorSection.style.display = 'block';
         // Hide the submission results
