@@ -92,7 +92,6 @@ async fn main() {
     println!("{}", ["#"; 20].concat());
     let shortest_path = shortest_path(source_actor, target_actor, &db).await;
 
-
     match shortest_path {
         Ok(path) => {
             println!("Degrees of connection: {}", path.len() - 1);

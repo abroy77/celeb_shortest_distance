@@ -14,8 +14,6 @@ pub struct Connection {
     actor_2: String,
 }
 
-
-
 pub async fn get_shortest_path(
     query: web::Form<TwoActors>,
     movie_db: web::Data<MovieDB>,
@@ -34,7 +32,6 @@ pub async fn get_shortest_path(
         shortest_path(query.actor_1, query.actor_2, &movie_db),
     )
     .await;
-
 
     let path = match shortest_path_result {
         Ok(Ok(path)) => path,
