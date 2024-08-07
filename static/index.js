@@ -112,6 +112,10 @@ const resultsSection = document.getElementById('submission-results');
 const spinner = document.getElementById('spinner-loading');
 
 async function get_shortest_path(actor_1_id, actor_2_id) {
+
+    if (actor_1_id === actor_2_id) {
+        throw new Error('Nice try bro it\'s the same person. I\'m not that dumb.');
+    }
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -140,9 +144,6 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
         }
 
         const data = await response.json();
-        if (data.length === 0) {
-            throw new Error('Nice try bro it\'s the same person. I\'m not that dumb.');
-        }
         return data;
 
 
