@@ -43,7 +43,8 @@ impl Config {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // get db file
     let config = Config::build(env::args())
         .unwrap_or_else(|err| panic!("Problem parsing arguments: {:?}", err));
@@ -89,7 +90,8 @@ fn main() {
     println!("{}", ["#"; 20].concat());
     println!("Calculating shortest path...");
     println!("{}", ["#"; 20].concat());
-    let shortest_path = shortest_path(source_actor, target_actor, &db);
+    let shortest_path = shortest_path(source_actor, target_actor, &db).await;
+
 
     match shortest_path {
         Ok(path) => {

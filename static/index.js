@@ -105,6 +105,7 @@ actorInput2.addEventListener('keyup', async () => {
 // Get the submit button element
 const submitButton = document.getElementById('submit-button');
 const errorSection = document.getElementById('error-section');
+const error_message = document.getElementById('error-message');
 const submissionResultsList = document.getElementById('submission-results-list');
 const pathLengthHeader = document.getElementById('path-length-header');
 const resultsSection = document.getElementById('submission-results');
@@ -179,6 +180,10 @@ submitButton.addEventListener('click', async () => {
             spinner.classList.remove('d-none');
             resultsSection.style.display = 'none';
             let shortest_path_json = await get_shortest_path(actor_1, actor_2);
+            // if shortest path is error, throw it
+            if (shortest_path_json.error) {
+                throw new Error(shortest_path_json.error);
+            }
             spinner.classList.add('d-none');
             render_path(shortest_path_json);
             // Hide the error section
@@ -188,10 +193,12 @@ submitButton.addEventListener('click', async () => {
         } catch (error) {
             console.error(error);
             spinner.classList.add('d-none');
+            error_message.textContent = 'Failed to fetch shortest path';
             // Show the error section
             errorSection.style.display = 'block';
             // Hide the submission results
             resultsSection.style.display = 'none';
+
         }
     } else {
         // Show the error section
