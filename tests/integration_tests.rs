@@ -28,25 +28,25 @@ mod test {
         let data_dir = PathBuf::from("data/new_large");
         make_db(&data_dir)
     }
-    #[test]
-    fn cruise_hanks() {
+    #[tokio::test]
+    async fn cruise_hanks() {
         let source_id: usize = 129;
         let target_id: usize = 158;
 
         let db = make_small_db();
 
-        let path = shortest_path(source_id, target_id, &db).unwrap();
+        let path = shortest_path(source_id, target_id, &db).await.unwrap();
         assert_eq!(path.len(), 3);
     }
-    #[test]
+    #[tokio::test]
     #[ignore = "takes too long"]
-    fn massey_fox() {
+    async fn massey_fox() {
         let source_id = 5368041;
         let target_id = 289114;
 
         let db = make_large_db();
 
-        let path = shortest_path(source_id, target_id, &db).unwrap();
+        let path = shortest_path(source_id, target_id, &db).await.unwrap();
         assert_eq!(path.len(), 8);
     }
 }

@@ -101,7 +101,7 @@ impl Graph {
     }
 }
 
-pub fn shortest_path(
+pub async fn shortest_path(
     source_actor_id: ActorId,
     target_actor_id: ActorId,
     movie_db: &MovieDB,
@@ -117,6 +117,12 @@ pub fn shortest_path(
         let node = &graph.nodes[node_index];
         // add current node actor id to explored list
         graph.explored.push(node.actor_id);
+
+        // yield control to event loop
+        if num_explored % 1000 == 0 {
+            tokio::task::yield_now().await;
+        }
+
         // get neighbours of node
         let neighbours = graph.get_neighbours(node_index, movie_db);
         // check if any neighbour is target
@@ -206,8 +212,8 @@ mod test {
         assert_eq!(neighbour_ids, vec![102, 163, 193, 197, 420, 596520]);
     }
 
-    #[test]
-    fn test_shortest_path_cruise_nicholson() {
+    #[tokio::test]
+    async fn test_shortest_path_cruise_nicholson() {
         let db = make_test_db();
         let source_id = 129; // tom cruise
         let target_id = 197; // Jack Nicholson
@@ -215,12 +221,12 @@ mod test {
         let tom_cruise = Node::new(source_id, None, None);
         let jack_nicholson = Node::new(target_id, Some(0), Some(104257));
 
-        let path = shortest_path(129, target_id, &db);
+        let path = shortest_path(129, target_id, &db).await;
         assert_eq!(path, Ok(vec![tom_cruise, jack_nicholson]));
     }
 
-    #[test]
-    fn test_shortest_path_cruise_hanks() {
+    #[tokio::test]
+    async fn test_shortest_path_cruise_hanks() {
         let db = make_test_db();
         let source_id = 129;
         let target_id = 158; // Tom Hanks
@@ -229,7 +235,7 @@ mod test {
         let connector = Node::new(102, Some(0), Some(104257));
         let hanks = Node::new(target_id, Some(102), Some(112384));
 
-        let path = shortest_path(source_id, target_id, &db);
+        let path = shortest_path(source_id, target_id, &db).await;
         assert_eq!(path, Ok(vec![tom_cruise, connector, hanks]));
     }
 }

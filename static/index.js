@@ -105,6 +105,7 @@ actorInput2.addEventListener('keyup', async () => {
 // Get the submit button element
 const submitButton = document.getElementById('submit-button');
 const errorSection = document.getElementById('error-section');
+const error_message = document.getElementById('error-message');
 const submissionResultsList = document.getElementById('submission-results-list');
 const pathLengthHeader = document.getElementById('path-length-header');
 const resultsSection = document.getElementById('submission-results');
@@ -116,7 +117,7 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
 
     const timeout = setTimeout(() => {
         controller.abort();
-    }, 25000);
+    }, 60000);
 
     try {
         const urlSearchParams = new URLSearchParams();
@@ -127,7 +128,7 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
             method: 'POST',
             body: urlSearchParams,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded',
             },
             signal: signal
         });
@@ -144,10 +145,11 @@ async function get_shortest_path(actor_1_id, actor_2_id) {
         }
         return data;
 
+
     } catch (error) {
         clearTimeout(timeout);
         if (error.name === 'AbortError') {
-            throw new Error('Bro, this is taking too long. Please choose another pair.');
+            throw new Error('Timed out after 60s');
         }
         console.error(error);
         throw error;
@@ -209,6 +211,10 @@ submitButton.addEventListener('click', async () => {
             spinner.classList.remove('d-none');
             resultsSection.style.display = 'none';
             let shortest_path_json = await get_shortest_path(actor_1, actor_2);
+            // if shortest path is error, throw it
+            if (shortest_path_json.error) {
+                throw new Error(shortest_path_json.error);
+            }
             spinner.classList.add('d-none');
             render_path(shortest_path_json);
             // Hide the error section
@@ -218,16 +224,18 @@ submitButton.addEventListener('click', async () => {
         } catch (error) {
             console.error(error);
             spinner.classList.add('d-none');
-            // Show the error message in the error section
-            errorSection.innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
+            error_message.textContent = error.message;
             // Show the error section
             errorSection.style.display = 'block';
             // Hide the submission results
             resultsSection.style.display = 'none';
+
         } finally {
             isSubmitting = false;
         }
     } else {
+
+        error_message.textContent = 'Please select 2 actors';
         // Show the error section
         errorSection.style.display = 'block';
         // Hide the submission results
