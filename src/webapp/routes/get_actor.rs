@@ -33,8 +33,6 @@ pub async fn get_actor(
     if actor.is_empty() {
         let similar_actors = db_connection::query_similar_actor(&pg_pool, &query.name).await;
         HttpResponse::Ok().json(similar_actors)
-    } else if actor.len() == 1 {
-        return HttpResponse::Ok().json(actor);
     } else {
         HttpResponse::Ok().json(actor)
     }

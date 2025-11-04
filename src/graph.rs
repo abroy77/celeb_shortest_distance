@@ -119,7 +119,7 @@ pub async fn shortest_path(
         graph.explored.push(node.actor_id);
 
         // yield control to event loop
-        if num_explored % 1000 == 0 {
+        if num_explored.is_multiple_of(1000) {
             tokio::task::yield_now().await;
         }
 

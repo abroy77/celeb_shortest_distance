@@ -111,8 +111,7 @@ impl MovieDBBuilder {
         let movies = match movies_reader_handle.join() {
             Ok(thread_result) => thread_result?,
             Err(_) => {
-                return Err(IoError::new(
-                    std::io::ErrorKind::Other,
+                return Err(IoError::other(
                     "Problem reading movies from file".to_string(),
                 ))
             }
@@ -121,8 +120,7 @@ impl MovieDBBuilder {
         let (actor_to_movie, movie_to_actor) = match am_reader_handle.join() {
             Ok(maps) => maps,
             Err(_) => {
-                return Err(IoError::new(
-                    std::io::ErrorKind::Other,
+                return Err(IoError::other(
                     "Problem reading actor movie pairs from file".to_string(),
                 ))
             }
