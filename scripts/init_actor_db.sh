@@ -1,3 +1,10 @@
+#! /bin/bash
+# Script to create a sqlite db of the actor names and their ids
+# This db will be used to allow quick searching of the actor's names
+# in the webapp as the user types in the actor's name
+# it will use prefix based testing as laid out
+# in src/webapp/get_actor.rs
+
 # set debug mode
 set -x
 # set exit on error and find pipe errors

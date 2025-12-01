@@ -45,5 +45,7 @@ Contains a unique ID, title, and year of release for each movie.
 ### Connections
 Contains pairs of actor IDs and movie IDs denoting which actors starred in which movies.
 
+## Some more documentation for the webapp and the actor db for quick search
+
 
 
