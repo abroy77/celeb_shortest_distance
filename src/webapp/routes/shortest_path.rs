@@ -1,7 +1,7 @@
 use crate::{data::MovieDB, graph::shortest_path};
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, web};
 use serde::{Deserialize, Serialize};
-use tokio::time::{timeout, Duration};
+use tokio::time::{Duration, timeout};
 #[derive(Deserialize)]
 pub struct TwoActors {
     actor_1: usize,
@@ -82,7 +82,7 @@ pub async fn get_shortest_path(
 mod tests {
 
     use crate::data::Actor;
-    use sqlx::{sqlite::SqliteConnectOptions, sqlite::SqlitePoolOptions, SqlitePool};
+    use sqlx::{SqlitePool, sqlite::SqliteConnectOptions, sqlite::SqlitePoolOptions};
 
     fn setup_actor_db() -> SqlitePool {
         let cnnection_options = SqliteConnectOptions::new().filename("actors.db");

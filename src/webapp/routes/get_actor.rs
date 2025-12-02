@@ -1,5 +1,5 @@
 use crate::{data::Actor, webapp::db_connection};
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, web};
 use serde::Deserialize;
 use sqlx::{self, FromRow, SqlitePool};
 

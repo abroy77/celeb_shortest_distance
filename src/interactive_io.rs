@@ -5,12 +5,11 @@ use std::io::{BufRead, Write};
 use strsim::jaro_winkler;
 
 pub fn get_actor_by_name(actors: &HashMap<usize, Actor>, name: &str) -> HashSet<Actor> {
-    let selected_actors = actors
+    actors
         .iter()
         .filter(|(_, actor)| actor.full_name == name)
         .map(|(_, actor)| actor.clone())
-        .collect();
-    selected_actors
+        .collect()
 }
 
 pub fn get_actor_by_id(actors: &HashMap<usize, Actor>, id: usize) -> Option<Actor> {
@@ -34,7 +33,7 @@ where
     let mut smallest_index = top_3
         .iter()
         .enumerate()
-        .min_by(|a, b| a.1 .1.partial_cmp(&b.1 .1).unwrap())
+        .min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap())
         .unwrap()
         .0;
     let mut lowest_score = top_3[smallest_index].1;
@@ -47,7 +46,7 @@ where
             smallest_index = top_3
                 .iter()
                 .enumerate()
-                .min_by(|a, b| a.1 .1.partial_cmp(&b.1 .1).unwrap())
+                .min_by(|a, b| a.1.1.partial_cmp(&b.1.1).unwrap())
                 .unwrap()
                 .0;
             lowest_score = top_3[smallest_index].1;

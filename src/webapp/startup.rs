@@ -4,7 +4,7 @@ use crate::webapp::routes::shortest_path::get_shortest_path;
 use crate::webapp::routes::{get_actor, get_actor_prefix};
 // use actix_cors::Cors;
 use actix_files as fs;
-use actix_web::{dev::Server, web, App, HttpServer};
+use actix_web::{App, HttpServer, dev::Server, web};
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 use std::net::TcpListener;
 use std::path::Path;

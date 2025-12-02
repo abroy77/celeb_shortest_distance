@@ -1,6 +1,6 @@
 use celeb_shortest_distance::configuration;
-use celeb_shortest_distance::webapp::telemetry;
 use celeb_shortest_distance::webapp::Application;
+use celeb_shortest_distance::webapp::telemetry;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {

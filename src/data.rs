@@ -113,7 +113,7 @@ impl MovieDBBuilder {
             Err(_) => {
                 return Err(IoError::other(
                     "Problem reading movies from file".to_string(),
-                ))
+                ));
             }
         };
 
@@ -122,7 +122,7 @@ impl MovieDBBuilder {
             Err(_) => {
                 return Err(IoError::other(
                     "Problem reading actor movie pairs from file".to_string(),
-                ))
+                ));
             }
         };
 
